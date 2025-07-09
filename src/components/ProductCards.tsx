@@ -26,52 +26,54 @@ export function ProductCards({ products, onAddToCart }: ProductCardsProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 p-4">
-      {products.map((product) => (
-        <Card key={product.id} className="bg-card border-border overflow-hidden">
-          <CardContent className="p-0">
-            <div className="aspect-square relative overflow-hidden">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-              <Button
-                size="icon"
-                variant="secondary"
-                className="absolute top-2 right-2 w-8 h-8 rounded-full"
-                onClick={() => onAddToCart?.(product)}
-              >
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            <div className="p-3 space-y-1">
-              <h3 className="text-sm font-medium text-foreground truncate">
-                {product.name}
-              </h3>
-              
-              <div className="flex items-center space-x-2">
-                <span className="text-sm font-semibold text-foreground">
-                  ₹{product.price}
-                </span>
-                {product.originalPrice && product.originalPrice > product.price && (
-                  <span className="text-xs text-muted-foreground line-through">
-                    ₹{product.originalPrice}
-                  </span>
-                )}
+    <div className="overflow-x-auto">
+      <div className="flex gap-3 p-4 w-max">
+        {products.map((product) => (
+          <Card key={product.id} className="bg-card border-border overflow-hidden w-40 flex-shrink-0">
+            <CardContent className="p-0">
+              <div className="aspect-square relative overflow-hidden">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="absolute top-2 right-2 w-8 h-8 rounded-full"
+                  onClick={() => onAddToCart?.(product)}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
               </div>
               
-              {product.description && (
-                <p className="text-xs text-muted-foreground line-clamp-2">
-                  {product.description}
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+              <div className="p-3 space-y-1">
+                <h3 className="text-sm font-medium text-foreground truncate">
+                  {product.name}
+                </h3>
+                
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-semibold text-foreground">
+                    ₹{product.price}
+                  </span>
+                  {product.originalPrice && product.originalPrice > product.price && (
+                    <span className="text-xs text-muted-foreground line-through">
+                      ₹{product.originalPrice}
+                    </span>
+                  )}
+                </div>
+                
+                {product.description && (
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {product.description}
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

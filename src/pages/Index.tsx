@@ -2,6 +2,9 @@ import { useState } from "react";
 import { MobileNavbar } from "@/components/MobileNavbar";
 import { AIAudioBlob, AudioBlobState } from "@/components/AIAudioBlob";
 import { ProductCards, Product } from "@/components/ProductCards";
+import { ShoppingListPopup } from "@/components/ShoppingListPopup";
+import { MapPopup } from "@/components/MapPopup";
+import { CameraInput } from "@/components/CameraInput";
 import { useToast } from "@/hooks/use-toast";
 
 // Import product images
@@ -13,6 +16,8 @@ import tshirt4 from "@/assets/product-tshirt-4.jpg";
 const Index = () => {
   const { toast } = useToast();
   const [audioState, setAudioState] = useState<AudioBlobState>("inactive");
+  const [showShoppingList, setShowShoppingList] = useState(false);
+  const [showMap, setShowMap] = useState(false);
   
   // Sample products data
   const [products] = useState<Product[]>([
@@ -50,10 +55,7 @@ const Index = () => {
   ]);
 
   const handleShoppingList = () => {
-    toast({
-      title: "Shopping List",
-      description: "Opening shopping list...",
-    });
+    setShowShoppingList(true);
   };
 
   const handleCart = () => {
@@ -64,16 +66,13 @@ const Index = () => {
   };
 
   const handleMap = () => {
-    toast({
-      title: "Store Map",
-      description: "Opening in-store map...",
-    });
+    setShowMap(true);
   };
 
-  const handleCamera = () => {
+  const handleImageCapture = (file: File) => {
     toast({
-      title: "Camera",
-      description: "Opening camera...",
+      title: "Image Captured",
+      description: `${file.name} ready for processing`,
     });
   };
 
@@ -109,7 +108,7 @@ const Index = () => {
           onShoppingListClick={handleShoppingList}
           onCartClick={handleCart}
           onMapClick={handleMap}
-          onCameraClick={handleCamera}
+          onImageCapture={handleImageCapture}
         />
 
         {/* Main Content */}
@@ -141,6 +140,16 @@ const Index = () => {
             />
           </div>
         </div>
+
+        {/* Popups */}
+        <ShoppingListPopup 
+          open={showShoppingList} 
+          onOpenChange={setShowShoppingList} 
+        />
+        <MapPopup 
+          open={showMap} 
+          onOpenChange={setShowMap} 
+        />
       </div>
     </div>
   );

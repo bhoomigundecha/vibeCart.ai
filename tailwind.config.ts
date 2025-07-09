@@ -63,6 +63,15 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				}
 			},
+			backgroundImage: {
+				'gradient-speaking': 'var(--gradient-speaking)',
+				'gradient-listening': 'var(--gradient-listening)',
+				'gradient-inactive': 'var(--gradient-inactive)',
+			},
+			boxShadow: {
+				'blob-active': 'var(--blob-shadow-active)',
+				'blob-listening': 'var(--blob-shadow-listening)',
+			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
@@ -84,11 +93,46 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'blob-pulse': {
+					'0%, 100%': {
+						transform: 'scale(1)',
+					},
+					'50%': {
+						transform: 'scale(1.05)',
+					}
+				},
+				'blob-speaking': {
+					'0%, 100%': {
+						transform: 'scale(1) rotate(0deg)',
+					},
+					'25%': {
+						transform: 'scale(1.1) rotate(1deg)',
+					},
+					'50%': {
+						transform: 'scale(1.05) rotate(0deg)',
+					},
+					'75%': {
+						transform: 'scale(1.08) rotate(-1deg)',
+					}
+				},
+				'blob-listening': {
+					'0%, 100%': {
+						transform: 'scale(1)',
+						opacity: '1'
+					},
+					'50%': {
+						transform: 'scale(1.02)',
+						opacity: '0.9'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'blob-pulse': 'blob-pulse 2s ease-in-out infinite',
+				'blob-speaking': 'blob-speaking 0.6s ease-in-out infinite',
+				'blob-listening': 'blob-listening 1.5s ease-in-out infinite'
 			}
 		}
 	},

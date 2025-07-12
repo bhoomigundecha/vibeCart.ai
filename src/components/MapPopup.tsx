@@ -12,67 +12,71 @@ interface MapPopupProps {
 export function MapPopup({ open, onOpenChange }: MapPopupProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("Produce");
 
-  // Store sections with colors and positions
+  // Store sections with better distributed positions
   const storeSections = [
-    { name: "Entrance", color: "bg-blue-600", position: "top-4 left-4", size: "w-20 h-12" },
-    { name: "Exit", color: "bg-blue-600", position: "bottom-4 left-4", size: "w-20 h-12" },
-    { name: "Pharmacy", color: "bg-orange-600", position: "top-4 left-28", size: "w-32 h-12" },
-    { name: "Customer Service", color: "bg-orange-600", position: "top-4 left-64", size: "w-32 h-12" },
-    { name: "Restrooms", color: "bg-gray-600", position: "top-4 right-4", size: "w-24 h-12" },
+    // Top row - entrance, pharmacy, customer service, restrooms
+    { name: "Entrance", color: "bg-blue-600", position: "top-4 left-4", size: "w-16 h-10" },
+    { name: "Pharmacy", color: "bg-orange-600", position: "top-4 left-24", size: "w-20 h-10" },
+    { name: "Customer Service", color: "bg-orange-600", position: "top-4 left-48", size: "w-24 h-10" },
+    { name: "Restrooms", color: "bg-gray-600", position: "top-4 right-4", size: "w-18 h-10" },
     
-    // Middle sections
-    { name: "Health & Wellness", color: "bg-gray-700", position: "top-20 left-28", size: "w-28 h-16" },
-    { name: "Bath & Body", color: "bg-gray-700", position: "top-20 left-60", size: "w-28 h-16" },
-    { name: "Home & Garden", color: "bg-primary", position: "top-20 right-32", size: "w-28 h-16" },
-    { name: "Electronics", color: "bg-purple-600", position: "top-20 right-4", size: "w-24 h-16" },
+    // Second row
+    { name: "Health & Wellness", color: "bg-gray-700", position: "top-20 left-4", size: "w-22 h-12" },
+    { name: "Bath & Body", color: "bg-gray-700", position: "top-20 left-28", size: "w-20 h-12" },
+    { name: "Home & Garden", color: "bg-primary", position: "top-20 left-52", size: "w-22 h-12" },
+    { name: "Electronics", color: "bg-purple-600", position: "top-20 right-4", size: "w-20 h-12" },
     
-    // Women's section
-    { name: "Women Accessories", color: "bg-green-600", position: "top-40 left-28", size: "w-32 h-12" },
-    { name: "Women Shoes", color: "bg-green-600", position: "top-56 left-28", size: "w-32 h-12" },
-    { name: "Women Perfume", color: "bg-green-600", position: "top-72 left-28", size: "w-32 h-12" },
+    // Third row - Women's section
+    { name: "Women Accessories", color: "bg-green-600", position: "top-36 left-4", size: "w-24 h-10" },
+    { name: "Women Shoes", color: "bg-green-600", position: "top-36 left-32", size: "w-20 h-10" },
+    { name: "Women Perfume", color: "bg-green-600", position: "top-36 left-56", size: "w-22 h-10" },
+    { name: "Seasonal", color: "bg-red-600", position: "top-36 right-4", size: "w-18 h-10" },
     
-    // Clothing sections
-    { name: "Girls Clothing", color: "bg-red-600", position: "top-40 left-64", size: "w-28 h-12" },
-    { name: "Seasonal", color: "bg-red-600", position: "top-40 right-16", size: "w-28 h-12" },
-    { name: "Boys Clothing", color: "bg-red-600", position: "top-56 left-64", size: "w-28 h-12" },
-    { name: "Crafts", color: "bg-red-600", position: "top-56 right-16", size: "w-28 h-12" },
+    // Fourth row - Clothing sections
+    { name: "Girls Clothing", color: "bg-red-600", position: "top-52 left-4", size: "w-20 h-10" },
+    { name: "Boys Clothing", color: "bg-red-600", position: "top-52 left-28", size: "w-20 h-10" },
+    { name: "Crafts", color: "bg-red-600", position: "top-52 left-52", size: "w-16 h-10" },
+    { name: "Toys", color: "bg-purple-600", position: "top-52 right-4", size: "w-16 h-10" },
     
-    // Right side sections
-    { name: "Electronics", color: "bg-purple-600", position: "top-40 right-4", size: "w-24 h-12" },
-    { name: "Electronics", color: "bg-purple-600", position: "top-72 right-4", size: "w-24 h-12" },
+    // Fifth row - Self checkout and more
+    { name: "Self Checkout", color: "bg-gray-600", position: "top-68 left-4", size: "w-22 h-10" },
+    { name: "Self Checkout", color: "bg-gray-600", position: "top-68 left-30", size: "w-22 h-10" },
+    { name: "Books & Media", color: "bg-blue-700", position: "top-68 left-56", size: "w-20 h-10" },
+    { name: "Pet Supplies", color: "bg-green-700", position: "top-68 right-4", size: "w-20 h-10" },
     
-    // Self checkout areas
-    { name: "Self Checkout", color: "bg-gray-600", position: "top-88 left-4", size: "w-28 h-12" },
-    { name: "Self Checkout", color: "bg-gray-600", position: "top-72 left-64", size: "w-28 h-12" },
+    // Bottom rows - Food sections
+    { name: "Beverages", color: "bg-purple-600", position: "bottom-32 left-4", size: "w-18 h-10" },
+    { name: "Snacks", color: "bg-purple-600", position: "bottom-32 left-26", size: "w-16 h-10" },
+    { name: "Candy", color: "bg-purple-600", position: "bottom-32 left-46", size: "w-16 h-10" },
+    { name: "Frozen Foods", color: "bg-blue-700", position: "bottom-32 right-4", size: "w-20 h-10" },
     
-    // Bottom sections - Food areas
-    { name: "Beverages", color: "bg-purple-600", position: "bottom-20 left-32", size: "w-24 h-12" },
-    { name: "Snacks", color: "bg-purple-600", position: "bottom-20 left-60", size: "w-20 h-12" },
-    { name: "Snacks", color: "bg-purple-600", position: "bottom-20 left-84", size: "w-20 h-12" },
-    { name: "Frozen Foods", color: "bg-blue-700", position: "bottom-20 right-4", size: "w-28 h-12" },
+    { name: "Dairy", color: "bg-green-600", position: "bottom-18 left-4", size: "w-16 h-10" },
+    { name: "Grocery", color: "bg-green-600", position: "bottom-18 left-24", size: "w-16 h-10" },
+    { name: "Bakery", color: "bg-orange-600", position: "bottom-18 left-44", size: "w-16 h-10" },
+    { name: "Meat & Seafood", color: "bg-red-600", position: "bottom-18 right-4", size: "w-22 h-10" },
     
-    // Main produce section (highlighted as destination)
-    { name: "Produce", color: "bg-accent", position: "bottom-4 left-32", size: "w-24 h-12", isDestination: true },
-    { name: "Dairy", color: "bg-green-600", position: "bottom-20 right-32", size: "w-20 h-12" },
-    { name: "Dairy", color: "bg-green-600", position: "bottom-4 right-4", size: "w-20 h-12" },
-    
-    // Bottom row
-    { name: "Grocery", color: "bg-green-600", position: "bottom-4 left-60", size: "w-20 h-12" },
-    { name: "Bakery", color: "bg-orange-600", position: "bottom-4 left-84", size: "w-20 h-12" },
-    { name: "Meat & Seafood", color: "bg-red-600", position: "bottom-4 left-108", size: "w-28 h-12" },
-    { name: "Meat & Seafood", color: "bg-red-600", position: "bottom-4 left-140", size: "w-28 h-12" },
+    // Bottom row with highlighted produce
+    { name: "Produce", color: "bg-accent", position: "bottom-4 left-4", size: "w-18 h-10", isDestination: true },
+    { name: "Deli", color: "bg-orange-600", position: "bottom-4 left-26", size: "w-14 h-10" },
+    { name: "Floral", color: "bg-pink-600", position: "bottom-4 left-44", size: "w-16 h-10" },
+    { name: "Exit", color: "bg-blue-600", position: "bottom-4 right-4", size: "w-14 h-10" },
   ];
 
   const pathPoints = [
-    { x: 14, y: 95 }, // Start at entrance
-    { x: 14, y: 85 },
-    { x: 40, y: 85 },
-    { x: 40, y: 95 }, // End at produce
+    { x: 12, y: 95 }, // Start at entrance
+    { x: 12, y: 85 },
+    { x: 12, y: 75 },
+    { x: 12, y: 65 },
+    { x: 12, y: 55 },
+    { x: 12, y: 45 },
+    { x: 12, y: 35 },
+    { x: 12, y: 25 },
+    { x: 12, y: 15 }, // End at produce
   ];
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="top" className="h-[85vh] bg-background">
+      <SheetContent side="top" className="h-[90vh] bg-background">
         <SheetHeader className="pb-4">
           <div className="flex items-center justify-between">
             <Button
@@ -100,18 +104,18 @@ export function MapPopup({ open, onOpenChange }: MapPopupProps) {
           </div>
         </div>
 
-        {/* Store Map */}
-        <div className="relative bg-muted/20 rounded-lg h-96 overflow-hidden border border-border">
+        {/* Store Map - Made larger and more spaced */}
+        <div className="relative bg-muted/20 rounded-lg h-[500px] overflow-hidden border border-border mb-4">
           {/* Store sections */}
           {storeSections.map((section, index) => (
             <div
               key={`${section.name}-${index}`}
-              className={`absolute ${section.position} ${section.size} ${section.color} rounded flex items-center justify-center cursor-pointer transition-all hover:opacity-80 ${
-                section.isDestination ? 'ring-2 ring-accent shadow-lg' : ''
+              className={`absolute ${section.position} ${section.size} ${section.color} rounded flex items-center justify-center cursor-pointer transition-all hover:opacity-80 hover:scale-105 ${
+                section.isDestination ? 'ring-2 ring-accent shadow-lg animate-pulse' : ''
               }`}
               onClick={() => setSelectedCategory(section.name)}
             >
-              <span className="text-xs font-medium text-white text-center px-1">
+              <span className="text-xs font-medium text-white text-center px-1 leading-tight">
                 {section.name}
               </span>
             </div>
@@ -122,16 +126,16 @@ export function MapPopup({ open, onOpenChange }: MapPopupProps) {
             <path
               d={`M ${pathPoints.map(p => `${p.x * 4} ${p.y * 4}`).join(' L ')}`}
               stroke="hsl(var(--accent))"
-              strokeWidth="3"
+              strokeWidth="4"
               fill="none"
-              strokeDasharray="8,4"
+              strokeDasharray="10,5"
               className="animate-pulse"
             />
             {/* Start point */}
             <circle 
               cx={pathPoints[0].x * 4} 
               cy={pathPoints[0].y * 4} 
-              r="6" 
+              r="8" 
               fill="hsl(var(--primary))" 
               className="animate-pulse"
             />
@@ -139,7 +143,7 @@ export function MapPopup({ open, onOpenChange }: MapPopupProps) {
             <circle 
               cx={pathPoints[pathPoints.length - 1].x * 4} 
               cy={pathPoints[pathPoints.length - 1].y * 4} 
-              r="8" 
+              r="10" 
               fill="hsl(var(--accent))" 
               className="animate-pulse"
             />
@@ -147,7 +151,7 @@ export function MapPopup({ open, onOpenChange }: MapPopupProps) {
         </div>
 
         {/* Quick Actions */}
-        <div className="mt-4 grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <Button
             variant="outline"
             size="sm"

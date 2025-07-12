@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,9 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom colors for hover states
+				'yellow-hover': '45 100% 76%', /* #FFC400 - Darker Yellow Shade */
 			},
 			backgroundImage: {
 				'gradient-speaking': 'var(--gradient-speaking)',

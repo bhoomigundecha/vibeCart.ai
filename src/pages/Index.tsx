@@ -4,6 +4,7 @@ import { AIAudioBlob, AudioBlobState } from "@/components/AIAudioBlob";
 import { ProductCards, Product } from "@/components/ProductCards";
 import { ShoppingListPopup } from "@/components/ShoppingListPopup";
 import { MapPopup } from "@/components/MapPopup";
+import { CartPopup } from "@/components/CartPopup";
 import { CameraInput } from "@/components/CameraInput";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,6 +18,7 @@ const Index = () => {
   const { toast } = useToast();
   const [audioState, setAudioState] = useState<AudioBlobState>("inactive");
   const [showShoppingList, setShowShoppingList] = useState(false);
+  const [showCart, setShowCart] = useState(false);
   const [showMap, setShowMap] = useState(false);
   
   // Sample products data
@@ -59,10 +61,7 @@ const Index = () => {
   };
 
   const handleCart = () => {
-    toast({
-      title: "Shopping Cart", 
-      description: "Opening shopping cart...",
-    });
+    setShowCart(true);
   };
 
   const handleMap = () => {
@@ -145,6 +144,10 @@ const Index = () => {
         <ShoppingListPopup 
           open={showShoppingList} 
           onOpenChange={setShowShoppingList} 
+        />
+        <CartPopup 
+          open={showCart} 
+          onOpenChange={setShowCart} 
         />
         <MapPopup 
           open={showMap} 

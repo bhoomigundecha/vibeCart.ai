@@ -1,3 +1,4 @@
+
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, Trash2 } from "lucide-react";
@@ -16,12 +17,16 @@ interface ShoppingListPopupProps {
 }
 
 export function ShoppingListPopup({ open, onOpenChange }: ShoppingListPopupProps) {
-  const [shoppingItems] = useState<ShoppingItem[]>([
+  const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([
     { id: "1", name: "Organic Bananas", category: "Fresh Produce", aisle: "Aisle 5" },
     { id: "2", name: "Whole Milk", category: "Fresh Produce", aisle: "Aisle 5" },
     { id: "3", name: "Tomato", category: "Fresh Produce", aisle: "Aisle 5" },
     { id: "4", name: "Pizza", category: "Fresh Produce", aisle: "Aisle 5" },
   ]);
+
+  const deleteItem = (id: string) => {
+    setShoppingItems(items => items.filter(item => item.id !== id));
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -42,33 +47,40 @@ export function ShoppingListPopup({ open, onOpenChange }: ShoppingListPopupProps
         </SheetHeader>
 
         <div className="space-y-3 mt-6">
-          {shoppingItems.map((item, index) => (
-            <div
-              key={item.id}
-              className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-                  {index + 1}
-                </div>
-                <div>
-                  <h3 className="font-medium text-foreground">{item.name}</h3>
-                  <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                    <span>{item.category}</span>
-                    <span>{item.aisle}</span>
+          {shoppingItems.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Your shopping list is empty</p>
+            </div>
+          ) : (
+            shoppingItems.map((item, index) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                    {index + 1}
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-foreground">{item.name}</h3>
+                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                      <span>{item.category}</span>
+                      <span>{item.aisle}</span>
+                    </div>
                   </div>
                 </div>
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-8 h-8 text-muted-foreground hover:text-destructive"
+                  onClick={() => deleteItem(item.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-8 h-8 text-muted-foreground hover:text-destructive"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </SheetContent>
     </Sheet>

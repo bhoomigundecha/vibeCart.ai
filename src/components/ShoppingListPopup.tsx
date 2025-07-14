@@ -1,10 +1,8 @@
-
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, Trash2 } from "lucide-react";
-import { useState } from "react";
 
-interface ShoppingItem {
+export interface ShoppingItem {
   id: string;
   name: string;
   category: string;
@@ -14,18 +12,18 @@ interface ShoppingItem {
 interface ShoppingListPopupProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  shoppingItems: ShoppingItem[];
+  setShoppingItems: React.Dispatch<React.SetStateAction<ShoppingItem[]>>;
 }
 
-export function ShoppingListPopup({ open, onOpenChange }: ShoppingListPopupProps) {
-  const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([
-    { id: "1", name: "Organic Bananas", category: "Fresh Produce", aisle: "Aisle 5" },
-    { id: "2", name: "Whole Milk", category: "Fresh Produce", aisle: "Aisle 5" },
-    { id: "3", name: "Tomato", category: "Fresh Produce", aisle: "Aisle 5" },
-    { id: "4", name: "Pizza", category: "Fresh Produce", aisle: "Aisle 5" },
-  ]);
-
+export function ShoppingListPopup({
+  open,
+  onOpenChange,
+  shoppingItems,
+  setShoppingItems
+}: ShoppingListPopupProps) {
   const deleteItem = (id: string) => {
-    setShoppingItems(items => items.filter(item => item.id !== id));
+    setShoppingItems((items) => items.filter((item) => item.id !== id));
   };
 
   return (
@@ -42,7 +40,7 @@ export function ShoppingListPopup({ open, onOpenChange }: ShoppingListPopupProps
               <Menu className="w-5 h-5" />
             </Button>
             <SheetTitle className="text-xl font-semibold text-foreground">Shopping List</SheetTitle>
-            <div className="w-10" /> {/* Spacer */}
+            <div className="w-10" />
           </div>
         </SheetHeader>
 
@@ -69,7 +67,6 @@ export function ShoppingListPopup({ open, onOpenChange }: ShoppingListPopupProps
                     </div>
                   </div>
                 </div>
-                
                 <Button
                   variant="ghost"
                   size="icon"

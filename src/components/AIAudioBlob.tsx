@@ -7,6 +7,7 @@ interface AIAudioBlobProps {
   state?: AudioBlobState;
   onStateChange?: (state: AudioBlobState) => void;
   onTap?: () => void;
+  addShoppingItems?: (items: string[]) => void;
 }
 
 const chatHistory: { role: "user" | "assistant"; content: string }[] = [];
@@ -14,7 +15,8 @@ const chatHistory: { role: "user" | "assistant"; content: string }[] = [];
 export function AIAudioBlob({
   state = "inactive",
   onStateChange,
-  onTap
+  onTap,
+  addShoppingItems
 }: AIAudioBlobProps) {
   const [currentState, setCurrentState] = useState<AudioBlobState>(state);
 
@@ -26,8 +28,7 @@ export function AIAudioBlob({
       return;
     }
 
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
 
     recognition.lang = "en-US";
@@ -43,40 +44,44 @@ export function AIAudioBlob({
       const transcript = event.results[0][0].transcript;
       console.log("🎤 Heard:", transcript);
 
-      // Push user message to chat history
       chatHistory.push({ role: "user", content: transcript });
 
       setCurrentState("speaking");
       onStateChange?.("speaking");
 
       try {
-        console.log("Sending chatHistory:", chatHistory);
-
         const response = await fetch("https://top-live-tadpole.ngrok-free.app/chat", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ messages: chatHistory })
         });
 
         const data = await response.json();
         console.log("Full API Response:", data);
 
-        const aiResponse = data.response?.content || "No response received.";
+        data.response.forEach((message: any) => {
+          if (message.role === "tool") {
+            try {
+              const toolData = JSON.parse(message.content);
+              const items = toolData?.data?.shopping_list;
 
+              if (Array.isArray(items)) {
+                console.log("Adding to shopping list:", items);
+                addShoppingItems?.(items);
+              }
+            } catch (err) {
+              console.error("Error parsing tool content:", err);
+            }
+          }
+        });
+
+        const last = data.response.find((m: any) => m.role === "assistant" && m.content);
+        const aiResponse = last?.content || "";
         console.log("AI:", aiResponse);
-
         chatHistory.push({ role: "assistant", content: aiResponse });
-
-        const utterance = new SpeechSynthesisUtterance(aiResponse);
-        utterance.lang = "en-US";
-        speechSynthesis.speak(utterance);
       } catch (err) {
         console.error("API Error:", err);
       }
-
-
 
       setTimeout(() => {
         setCurrentState("inactive");
@@ -92,20 +97,15 @@ export function AIAudioBlob({
   };
 
   const getBlobClasses = () => {
-    const base =
-      "w-48 h-48 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300";
-    if (currentState === "speaking")
-      return `${base} bg-gradient-speaking animate-blob-speaking shadow-blob-active`;
-    if (currentState === "listening")
-      return `${base} bg-gradient-listening animate-blob-listening shadow-blob-listening`;
+    const base = "w-48 h-48 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300";
+    if (currentState === "speaking") return `${base} bg-gradient-speaking animate-blob-speaking shadow-blob-active`;
+    if (currentState === "listening") return `${base} bg-gradient-listening animate-blob-listening shadow-blob-listening`;
     return `${base} bg-gradient-inactive animate-blob-pulse`;
   };
 
   const getIcon = () => {
-    if (currentState === "speaking")
-      return <AudioLines className="w-12 h-12 text-background" />;
-    if (currentState === "listening")
-      return <Mic className="w-12 h-12 text-background" />;
+    if (currentState === "speaking") return <AudioLines className="w-12 h-12 text-background" />;
+    if (currentState === "listening") return <Mic className="w-12 h-12 text-background" />;
     return <MicOff className="w-12 h-12 text-muted-foreground" />;
   };
 
@@ -117,9 +117,7 @@ export function AIAudioBlob({
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            handleBlobClick();
-          }
+          if (e.key === "Enter" || e.key === " ") handleBlobClick();
         }}
         aria-label={`AI Assistant - ${currentState}`}
       >

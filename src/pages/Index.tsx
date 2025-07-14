@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MobileNavbar } from "@/components/MobileNavbar";
 import { AIAudioBlob, AudioBlobState } from "@/components/AIAudioBlob";
 import { ProductCards, Product } from "@/components/ProductCards";
@@ -8,65 +8,44 @@ import { CartPopup } from "@/components/CartPopup";
 import { CameraInput } from "@/components/CameraInput";
 import { useToast } from "@/hooks/use-toast";
 
-// Import product images
-import tshirt1 from "@/assets/product-tshirt-1.jpg";
-import tshirt2 from "@/assets/product-tshirt-2.jpg";
-import tshirt3 from "@/assets/product-tshirt-3.jpg";
-import tshirt4 from "@/assets/product-tshirt-4.jpg";
-
 const Index = () => {
   const { toast } = useToast();
+
   const [audioState, setAudioState] = useState<AudioBlobState>("inactive");
   const [showShoppingList, setShowShoppingList] = useState(false);
   const [showCart, setShowCart] = useState(false);
   const [showMap, setShowMap] = useState(false);
-  
-  // Sample products data
-  const [products] = useState<Product[]>([
-    {
-      id: "1",
-      name: "Streetwear Green Tee",
-      price: 1999,
-      originalPrice: 2999,
-      image: tshirt1,
-      description: "Premium quality streetwear t-shirt with modern design"
-    },
-    {
-      id: "2", 
-      name: "Urban Black Tee",
-      price: 1799,
-      originalPrice: 2499,
-      image: tshirt2,
-      description: "Stylish black t-shirt with urban graphics"
-    },
-    {
-      id: "3",
-      name: "Minimalist White Tee", 
-      price: 1599,
-      image: tshirt3,
-      description: "Clean and minimalist design for everyday wear"
-    },
-    {
-      id: "4",
-      name: "Cool Blue Streetwear",
-      price: 2199,
-      originalPrice: 2799,
-      image: tshirt4,
-      description: "Trendy blue t-shirt with modern streetwear vibes"
-    }
-  ]);
+  const [products, setProducts] = useState<Product[]>([]);
 
-  const handleShoppingList = () => {
-    setShowShoppingList(true);
-  };
+  // 🔁 Fetch product recommendations
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      try {
+        const res = await fetch("https://top-live-tadpole.ngrok-free.app/recommendations", {
+          
+        });
+        const data = await res.json();
 
-  const handleCart = () => {
-    setShowCart(true);
-  };
+        if (Array.isArray(data)) {
+          setProducts(data);
+        } else {
+          console.warn("Unexpected recommendations format", data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch product recommendations:", err);
+      }
+    };
 
-  const handleMap = () => {
-    setShowMap(true);
-  };
+    fetchRecommendations();
+
+    // Optional refresh every 30s
+    const intervalId = setInterval(fetchRecommendations, 30000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const handleShoppingList = () => setShowShoppingList(true);
+  const handleCart = () => setShowCart(true);
+  const handleMap = () => setShowMap(true);
 
   const handleImageCapture = (file: File) => {
     toast({
@@ -84,7 +63,7 @@ const Index = () => {
 
   const handleAudioStateChange = (state: AudioBlobState) => {
     setAudioState(state);
-    
+
     if (state === "listening") {
       toast({
         title: "Listening",
@@ -100,9 +79,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile-only container - enforces phone aspect ratio */}
       <div className="max-w-sm mx-auto min-h-screen bg-background relative">
-        {/* Navigation Bar */}
+        {/* Navigation */}
         <MobileNavbar
           onShoppingListClick={handleShoppingList}
           onCartClick={handleCart}
@@ -112,17 +90,17 @@ const Index = () => {
 
         {/* Main Content */}
         <div className="pt-16 pb-4 flex flex-col">
-          {/* AI Audio Blob - Centered */}
+          {/* AI Audio Blob */}
           <div className="flex-1 flex items-center justify-center py-12">
             <AIAudioBlob
               state={audioState}
               onStateChange={handleAudioStateChange}
-              onTap={() => {
+              onTap={() =>
                 toast({
                   title: "AI Assistant",
                   description: "Blob tapped!",
-                });
-              }}
+                })
+              }
             />
           </div>
 
@@ -141,18 +119,9 @@ const Index = () => {
         </div>
 
         {/* Popups */}
-        <ShoppingListPopup 
-          open={showShoppingList} 
-          onOpenChange={setShowShoppingList} 
-        />
-        <CartPopup 
-          open={showCart} 
-          onOpenChange={setShowCart} 
-        />
-        <MapPopup 
-          open={showMap} 
-          onOpenChange={setShowMap} 
-        />
+        <ShoppingListPopup open={showShoppingList} onOpenChange={setShowShoppingList} />
+        <CartPopup open={showCart} onOpenChange={setShowCart} />
+        <MapPopup open={showMap} onOpenChange={setShowMap} />
       </div>
     </div>
   );

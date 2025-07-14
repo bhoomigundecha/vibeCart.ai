@@ -9,7 +9,6 @@ interface AIAudioBlobProps {
   onTap?: () => void;
 }
 
-// Global chat history that persists across renders
 const chatHistory: { role: "user" | "assistant"; content: string }[] = [];
 
 export function AIAudioBlob({
@@ -68,10 +67,8 @@ export function AIAudioBlob({
 
         console.log("AI:", aiResponse);
 
-        // Push AI response to chat history
         chatHistory.push({ role: "assistant", content: aiResponse });
 
-        // ✅ Speak it aloud
         const utterance = new SpeechSynthesisUtterance(aiResponse);
         utterance.lang = "en-US";
         speechSynthesis.speak(utterance);

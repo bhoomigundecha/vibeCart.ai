@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Mic, MicOff, AudioLines } from "lucide-react";
 
 export type AudioBlobState = "speaking" | "listening" | "inactive";
@@ -9,72 +9,107 @@ interface AIAudioBlobProps {
   onTap?: () => void;
 }
 
-export function AIAudioBlob({ 
-  state = "inactive", 
-  onStateChange, 
-  onTap 
+// Global chat history that persists across renders
+const chatHistory: { role: "user" | "assistant"; content: string }[] = [];
+
+export function AIAudioBlob({
+  state = "inactive",
+  onStateChange,
+  onTap
 }: AIAudioBlobProps) {
   const [currentState, setCurrentState] = useState<AudioBlobState>(state);
-  const [inactiveTimer, setInactiveTimer] = useState<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    setCurrentState(state);
-  }, [state]);
-
-  // Auto-switch to inactive after 5 seconds of listening
-  useEffect(() => {
-    if (currentState === "listening") {
-      const timer = setTimeout(() => {
-        setCurrentState("inactive");
-        onStateChange?.("inactive");
-      }, 5000);
-      setInactiveTimer(timer);
-      return () => clearTimeout(timer);
-    } else if (inactiveTimer) {
-      clearTimeout(inactiveTimer);
-      setInactiveTimer(null);
-    }
-  }, [currentState, onStateChange]);
 
   const handleBlobClick = () => {
     onTap?.();
-    
-    if (currentState === "inactive") {
-      setCurrentState("listening");
-      onStateChange?.("listening");
-    } else if (currentState === "listening") {
+
+    if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+      console.error("SpeechRecognition not supported in this browser.");
+      return;
+    }
+
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    setCurrentState("listening");
+    onStateChange?.("listening");
+
+    recognition.start();
+
+    recognition.onresult = async (event: SpeechRecognitionEvent) => {
+      const transcript = event.results[0][0].transcript;
+      console.log("🎤 Heard:", transcript);
+
+      // Push user message to chat history
+      chatHistory.push({ role: "user", content: transcript });
+
+      setCurrentState("speaking");
+      onStateChange?.("speaking");
+
+      try {
+        console.log("Sending chatHistory:", chatHistory);
+
+        const response = await fetch("https://top-live-tadpole.ngrok-free.app/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ messages: chatHistory })
+        });
+
+        const data = await response.json();
+        console.log("Full API Response:", data);
+
+        const aiResponse = data.response?.content || "No response received.";
+
+        console.log("AI:", aiResponse);
+
+        // Push AI response to chat history
+        chatHistory.push({ role: "assistant", content: aiResponse });
+
+        // ✅ Speak it aloud
+        const utterance = new SpeechSynthesisUtterance(aiResponse);
+        utterance.lang = "en-US";
+        speechSynthesis.speak(utterance);
+      } catch (err) {
+        console.error("API Error:", err);
+      }
+
+
+
+      setTimeout(() => {
+        setCurrentState("inactive");
+        onStateChange?.("inactive");
+      }, 1000);
+    };
+
+    recognition.onerror = (e) => {
+      console.error("Speech recognition error:", e);
       setCurrentState("inactive");
       onStateChange?.("inactive");
-    }
-    // Speaking state should not be manually changed by tap
+    };
   };
 
   const getBlobClasses = () => {
-    const baseClasses = "w-48 h-48 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300";
-    
-    switch (currentState) {
-      case "speaking":
-        return `${baseClasses} bg-gradient-speaking animate-blob-speaking shadow-blob-active`;
-      case "listening":
-        return `${baseClasses} bg-gradient-listening animate-blob-listening shadow-blob-listening`;
-      case "inactive":
-        return `${baseClasses} bg-gradient-inactive animate-blob-pulse`;
-      default:
-        return `${baseClasses} bg-gradient-inactive`;
-    }
+    const base =
+      "w-48 h-48 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300";
+    if (currentState === "speaking")
+      return `${base} bg-gradient-speaking animate-blob-speaking shadow-blob-active`;
+    if (currentState === "listening")
+      return `${base} bg-gradient-listening animate-blob-listening shadow-blob-listening`;
+    return `${base} bg-gradient-inactive animate-blob-pulse`;
   };
 
   const getIcon = () => {
-    switch (currentState) {
-      case "speaking":
-        return <AudioLines className="w-12 h-12 text-background" />;
-      case "listening":
-        return <Mic className="w-12 h-12 text-background" />;
-      case "inactive":
-        return <MicOff className="w-12 h-12 text-muted-foreground" />;
-      default:
-        return <MicOff className="w-12 h-12 text-muted-foreground" />;
-    }
+    if (currentState === "speaking")
+      return <AudioLines className="w-12 h-12 text-background" />;
+    if (currentState === "listening")
+      return <Mic className="w-12 h-12 text-background" />;
+    return <MicOff className="w-12 h-12 text-muted-foreground" />;
   };
 
   return (
@@ -93,12 +128,13 @@ export function AIAudioBlob({
       >
         {getIcon()}
       </div>
-      
       <div className="text-center">
         <p className="text-sm text-muted-foreground capitalize">
-          {currentState === "speaking" ? "AI Speaking..." : 
-           currentState === "listening" ? "Listening..." : 
-           "Tap to speak"}
+          {currentState === "speaking"
+            ? "AI Speaking..."
+            : currentState === "listening"
+            ? "Listening..."
+            : "Tap to speak"}
         </p>
       </div>
     </div>

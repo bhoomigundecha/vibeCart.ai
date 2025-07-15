@@ -3,7 +3,7 @@ import { MobileNavbar } from "@/components/MobileNavbar";
 import { AIAudioBlob, AudioBlobState } from "@/components/AIAudioBlob";
 import { ProductCards, Product } from "@/components/ProductCards";
 import { ShoppingListPopup } from "@/components/ShoppingListPopup";
-import { MapPopup } from "@/components/MapPopup";
+import MapPopup  from "@/components/MapPopup";
 import { CartPopup } from "@/components/CartPopup";
 import { CameraInput } from "@/components/CameraInput";
 import { useToast } from "@/hooks/use-toast";

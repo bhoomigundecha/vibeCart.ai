@@ -23,7 +23,9 @@ const Index = () => {
   const [showShoppingList, setShowShoppingList] = useState(false);
   const [showCart, setShowCart] = useState(false);
   const [showMap, setShowMap] = useState(false);
-  const [products, setProducts] = useState<Product[]>([]);
+
+  const [productsFromAI, setProductsFromAI] = useState<Product[]>([]);
+  const [productsFromShopping, setProductsFromShopping] = useState<Product[]>([]);
   const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([]);
 
   const prevShoppingItemsRef = useRef<ShoppingItem[]>([]);
@@ -42,7 +44,6 @@ const Index = () => {
     const bNames = b.map(i => i.name.toLowerCase()).sort();
     return aNames.every((val, idx) => val === bNames[idx]);
   };
-
 
   const fetchRecommendations = useCallback(async (shoppingNames: string[]) => {
     try {
@@ -67,7 +68,7 @@ const Index = () => {
           discount: item.product.discount
         }));
 
-        setProducts(formattedProducts);
+        setProductsFromShopping(formattedProducts);
       } else {
         console.warn("Recommendation has wrong format:", data);
       }
@@ -115,6 +116,19 @@ const Index = () => {
     });
   };
 
+  const handleRecommendedProductsFromAI = (productsFromAIList: any[]) => {
+    const formatted = productsFromAIList.map((item: any, index: number) => ({
+      id: item.id || `rec-ai-${index}`,
+      name: item.name,
+      price: item.selling_price,
+      originalPrice: item.mrp,
+      image: item.image,
+      description: item.description,
+      discount: item.discount
+    }));
+
+    setProductsFromAI(formatted); // Replace previous AI recommendations
+  };
 
   const handleAddToCart = (product: Product) => {
     toast({
@@ -145,13 +159,9 @@ const Index = () => {
             <AIAudioBlob
               state={audioState}
               onStateChange={handleAudioStateChange}
-              onTap={() =>
-                toast({
-                  title: "AI Assistant",
-                  description: "Blob tapped!",
-                })
-              }
+              onTap={() => toast({ title: "AI Assistant", description: "Blob tapped!" })}
               addShoppingItems={handleShoppingItemsFromAI}
+              setRecommendedProducts={handleRecommendedProductsFromAI}
             />
           </div>
 
@@ -162,7 +172,7 @@ const Index = () => {
               </h2>
             </div>
             <ProductCards
-              products={products}
+              products={[...productsFromAI, ...productsFromShopping]}
               onAddToCart={handleAddToCart}
             />
           </div>

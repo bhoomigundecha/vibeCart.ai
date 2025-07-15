@@ -230,27 +230,23 @@ const MapPopup: React.FC<MapPopupProps> = ({ open, onOpenChange }) => {
     const getKey = (pos: Position) => `${pos.row},${pos.col}`;
     const heuristic = (a: Position, b: Position) => Math.abs(a.row - b.row) + Math.abs(a.col - b.col);
     
-    // Check if a position has a section (is blocked)
     const hasSection = (pos: Position) => {
       return false;
     };
 
-    // Get walkable neighbors - this creates paths around sections
     const getWalkableNeighbors = (pos: Position): Position[] => {
       const neighbors = [];
       
-      // Add direct neighbors for aisle walking
       const directions = [
-        { row: -1, col: 0 }, // up
-        { row: 1, col: 0 },  // down
-        { row: 0, col: -1 }, // left
-        { row: 0, col: 1 }   // right
+        { row: -1, col: 0 }, 
+        { row: 1, col: 0 },  
+        { row: 0, col: -1 }, 
+        { row: 0, col: 1 }   
       ];
 
       for (const dir of directions) {
         const newPos = { row: pos.row + dir.row, col: pos.col + dir.col };
         
-        // Allow movement to empty spaces (aisles) or to start/end points
         if (!hasSection(newPos) || 
             (start.row === newPos.row && start.col === newPos.col) ||
             (end.row === newPos.row && end.col === newPos.col)) {
@@ -370,7 +366,6 @@ const MapPopup: React.FC<MapPopupProps> = ({ open, onOpenChange }) => {
     };
   };
 
-  // Calculate path lines between connected sections (showing aisle paths with dashed lines)
   const renderPathLines = () => {
     if (path.length < 2) return null;
 
@@ -380,7 +375,6 @@ const MapPopup: React.FC<MapPopupProps> = ({ open, onOpenChange }) => {
       const currentPos = path[i];
       const nextPos = path[i + 1];
       
-      // Get the actual DOM elements
       const currentElement = document.querySelector(`[data-position="${currentPos.row}-${currentPos.col}"]`);
       const nextElement = document.querySelector(`[data-position="${nextPos.row}-${nextPos.col}"]`);
       
@@ -390,24 +384,20 @@ const MapPopup: React.FC<MapPopupProps> = ({ open, onOpenChange }) => {
       const nextRect = nextElement.getBoundingClientRect();
       const containerRect = mapRef.current.getBoundingClientRect();
       
-      // Calculate centers of each section relative to container
       const currentCenterX = currentRect.left + currentRect.width / 2 - containerRect.left;
       const currentCenterY = currentRect.top + currentRect.height / 2 - containerRect.top;
       const nextCenterX = nextRect.left + nextRect.width / 2 - containerRect.left;
       const nextCenterY = nextRect.top + nextRect.height / 2 - containerRect.top;
       
-      // Create walkable path that goes around sections
       const isHorizontalMove = Math.abs(nextPos.col - currentPos.col) > 0 && nextPos.row === currentPos.row;
       const isVerticalMove = Math.abs(nextPos.row - currentPos.row) > 0 && nextPos.col === currentPos.col;
       
       if (isHorizontalMove) {
-        // Horizontal movement - path goes between sections with thick dashed line
         const pathY = Math.min(currentCenterY, nextCenterY) + Math.abs(currentCenterY - nextCenterY) / 2;
         const pathStartX = Math.min(currentCenterX, nextCenterX);
         const pathEndX = Math.max(currentCenterX, nextCenterX);
         const pathWidth = pathEndX - pathStartX;
         
-        // Create multiple dashed segments for better visibility
         const dashCount = Math.floor(pathWidth / 20);
         for (let d = 0; d < dashCount; d++) {
           const dashX = pathStartX + (d * 20);
@@ -430,7 +420,6 @@ const MapPopup: React.FC<MapPopupProps> = ({ open, onOpenChange }) => {
           );
         }
         
-        // Add direction arrow
         lines.push(
           <div
             key={`arrow-${i}`}
@@ -448,13 +437,11 @@ const MapPopup: React.FC<MapPopupProps> = ({ open, onOpenChange }) => {
           </div>
         );
       } else if (isVerticalMove) {
-        // Vertical movement - path goes between sections with thick dashed line
         const pathX = Math.min(currentCenterX, nextCenterX) + Math.abs(currentCenterX - nextCenterX) / 2;
         const pathStartY = Math.min(currentCenterY, nextCenterY);
         const pathEndY = Math.max(currentCenterY, nextCenterY);
         const pathHeight = pathEndY - pathStartY;
         
-        // Create multiple dashed segments for better visibility
         const dashCount = Math.floor(pathHeight / 20);
         for (let d = 0; d < dashCount; d++) {
           const dashY = pathStartY + (d * 20);
@@ -477,7 +464,6 @@ const MapPopup: React.FC<MapPopupProps> = ({ open, onOpenChange }) => {
           );
         }
         
-        // Add direction arrow
         lines.push(
           <div
             key={`arrow-${i}`}
@@ -495,11 +481,9 @@ const MapPopup: React.FC<MapPopupProps> = ({ open, onOpenChange }) => {
           </div>
         );
       } else {
-        // Diagonal movement - create L-shaped path through aisles with thick dashed lines
         const midX = currentCenterX;
         const midY = nextCenterY;
         
-        // Vertical segment dashes
         const vHeight = Math.abs(midY - currentCenterY);
         const vDashCount = Math.floor(vHeight / 20);
         for (let d = 0; d < vDashCount; d++) {
@@ -523,7 +507,6 @@ const MapPopup: React.FC<MapPopupProps> = ({ open, onOpenChange }) => {
           );
         }
         
-        // Horizontal segment dashes
         const hWidth = Math.abs(nextCenterX - midX);
         const hDashCount = Math.floor(hWidth / 20);
         for (let d = 0; d < hDashCount; d++) {
@@ -547,7 +530,6 @@ const MapPopup: React.FC<MapPopupProps> = ({ open, onOpenChange }) => {
           );
         }
         
-        // Add direction arrows for L-shaped path
         lines.push(
           <div
             key={`v-arrow-${i}`}
@@ -587,7 +569,6 @@ const MapPopup: React.FC<MapPopupProps> = ({ open, onOpenChange }) => {
     return lines;
   };
 
-  // Create a 2D grid for sections only
   const sectionGrid = Array(GRID_ROWS).fill(null).map(() => Array(GRID_COLS).fill(null));
   sections.forEach((section, index) => {
     const row = Math.floor(index / GRID_COLS);
@@ -595,7 +576,6 @@ const MapPopup: React.FC<MapPopupProps> = ({ open, onOpenChange }) => {
     sectionGrid[row][col] = section;
   });
 
-  // Don't render anything if not open
   if (!open) return null;
 
   return (

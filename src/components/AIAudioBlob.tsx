@@ -7,16 +7,17 @@ interface AIAudioBlobProps {
   onStateChange?: (state: AudioBlobState) => void;
   onTap?: () => void;
   addShoppingItems?: (items: string[]) => void;
+  setRecommendedProducts?: (products: any[] | ((prev: any[]) => any[])) => void;
 }
 
 const chatHistory: { role: "system" | "assistant" | "user" | "tools"; content: string }[] = [];
-
 
 export function AIAudioBlob({
   state = "inactive",
   onStateChange,
   onTap,
-  addShoppingItems
+  addShoppingItems,
+  setRecommendedProducts
 }: AIAudioBlobProps) {
   const [currentState, setCurrentState] = useState<AudioBlobState>(state);
 
@@ -59,26 +60,46 @@ export function AIAudioBlob({
         const data = await response.json();
         console.log("Full API Response:", data);
 
-        const toolMessage = [...data.response].reverse().find((message: any) => message.role === "tool");
+        const toolMessage = [...data.response].reverse().find(
+          (message: any) => message.role === "tool"
+        );
 
         if (toolMessage) {
           try {
             const toolData = JSON.parse(toolMessage.content);
+
+            // when you add some shopping list mei it gets updated
             const inner = typeof toolData.data === "string" ? JSON.parse(toolData.data) : toolData.data;
             const items = inner?.shopping_list;
-
             if (Array.isArray(items)) {
-              console.log(items)
-              console.log("Adding to shopping list:", items);
-              console.log(items);
               addShoppingItems?.(items);
+            }
+            // while recommended mei update
+            if (toolMessage.name === "search_product") {
+              const productData = typeof toolData.data === "string"
+                ? JSON.parse(toolData.data)
+                : toolData.data;
+
+              if (Array.isArray(productData)) {
+                const formatted = productData.map((item: any, index: number) => ({
+                  id: item.id || `ai-${index}`,
+                  name: item.name,
+                  price: item.selling_price,
+                  originalPrice: item.mrp,
+                  image: item.image,
+                  description: item.description,
+                  discount: item.discount,
+                }));
+
+                setRecommendedProducts?.(formatted);
+              } else {
+                console.warn("Expected product array, got:", productData);
+              }
             }
           } catch (err) {
             console.error("Error parsing tool content:", err);
           }
         }
-
-        
 
 
         const last = data.response.find((m: any) => m.role === "assistant" && m.content);
@@ -87,23 +108,22 @@ export function AIAudioBlob({
         chatHistory.push({ role: "assistant", content: aiResponse });
 
         if (aiResponse) {
-            const ttsResponse = await fetch("https://top-live-tadpole.ngrok-free.app/tts", {
-              method: "POST",
-              headers: {
-                "content-type": "application/json",
-              },
-              body: JSON.stringify({ text: aiResponse }),
-            });
+          const ttsResponse = await fetch("https://top-live-tadpole.ngrok-free.app/tts", {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+            },
+            body: JSON.stringify({ text: aiResponse }),
+          });
 
-            if (!ttsResponse.ok) throw new Error("TTS request failed");
+          if (!ttsResponse.ok) throw new Error("TTS request failed");
 
-            const audioBlob = await ttsResponse.blob();
-            const audioUrl = URL.createObjectURL(audioBlob);
+          const audioBlob = await ttsResponse.blob();
+          const audioUrl = URL.createObjectURL(audioBlob);
 
-            const audio = new Audio(audioUrl);
-            audio.play();
-          }
-
+          const audio = new Audio(audioUrl);
+          audio.play();
+        }
       } catch (err) {
         console.error("API Error:", err);
       }

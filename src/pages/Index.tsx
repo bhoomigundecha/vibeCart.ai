@@ -1,9 +1,9 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { MobileNavbar } from "@/components/MobileNavbar";
 import { AIAudioBlob, AudioBlobState } from "@/components/AIAudioBlob";
 import { ProductCards, Product } from "@/components/ProductCards";
 import { ShoppingListPopup } from "@/components/ShoppingListPopup";
-import MapPopup  from "@/components/MapPopup";
+import MapPopup from "@/components/MapPopup";
 import { CartPopup } from "@/components/CartPopup";
 import { CameraInput } from "@/components/CameraInput";
 import { useToast } from "@/hooks/use-toast";
@@ -24,16 +24,25 @@ const Index = () => {
   const [showCart, setShowCart] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
-  const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([
-    // { id: uuidv4(), name: "Organic Bananas", category: "Fresh Produce", aisle: "Aisle 5" },
-    // { id: uuidv4(), name: "Whole Milk", category: "Fresh Produce", aisle: "Aisle 5" },
-    // { id: uuidv4(), name: "Tomato", category: "Fresh Produce", aisle: "Aisle 5" },
-    // { id: uuidv4(), name: "Pizza", category: "Frozen", aisle: "Aisle 10" },
-  ]);
+  const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([]);
+
+  const prevShoppingItemsRef = useRef<ShoppingItem[]>([]);
 
   const handleItemsChange = (items: ShoppingItem[]) => {
     setShoppingItems(items);
   };
+
+  const handleShoppingList = () => setShowShoppingList(true);
+  const handleCart = () => setShowCart(true);
+  const handleMap = () => setShowMap(true);
+
+  const arraysAreEqual = (a: ShoppingItem[], b: ShoppingItem[]) => {
+    if (a.length !== b.length) return false;
+    const aNames = a.map(i => i.name.toLowerCase()).sort();
+    const bNames = b.map(i => i.name.toLowerCase()).sort();
+    return aNames.every((val, idx) => val === bNames[idx]);
+  };
+
 
   const fetchRecommendations = useCallback(async (shoppingNames: string[]) => {
     try {
@@ -60,39 +69,27 @@ const Index = () => {
 
         setProducts(formattedProducts);
       } else {
-        console.warn("Rcommendation has the wrong from:", data);
+        console.warn("Recommendation has wrong format:", data);
       }
     } catch (err) {
-      console.error("cant fetch:", err);
+      console.error("Can't fetch recommendations:", err);
     }
   }, []);
 
-
   useEffect(() => {
     const shoppingNames = shoppingItems.map(item => item.name);
-    fetchRecommendations(shoppingNames);
 
-    const intervalId = setInterval(() => fetchRecommendations(shoppingNames), 30000);
+    if (!arraysAreEqual(prevShoppingItemsRef.current, shoppingItems)) {
+      fetchRecommendations(shoppingNames);
+      prevShoppingItemsRef.current = shoppingItems;
+    }
+
+    const intervalId = setInterval(() => {
+      fetchRecommendations(shoppingNames);
+    }, 30000);
+
     return () => clearInterval(intervalId);
   }, [shoppingItems, fetchRecommendations]);
-
-  const handleShoppingList = () => setShowShoppingList(true);
-  const handleCart = () => setShowCart(true);
-  const handleMap = () => setShowMap(true);
-
-  const handleImageCapture = (file: File) => {
-    toast({
-      title: "Image Captured",
-      description: `${file.name} ready for processing`,
-    });
-  };
-
-  const handleAddToCart = (product: Product) => {
-    toast({
-      title: "Added to Cart",
-      description: `${product.name} added to your cart`,
-    });
-  };
 
   const handleAudioStateChange = (state: AudioBlobState) => {
     setAudioState(state);
@@ -104,13 +101,33 @@ const Index = () => {
   };
 
   const handleShoppingItemsFromAI = (names: string[]) => {
-    const newItems: ShoppingItem[] = names.map((name) => ({
-      id: uuidv4(),
-      name,
-      category: "Unknown",
-      aisle: "Unknown"
-    }));
-    setShoppingItems(prev => [...prev, ...newItems]);
+    setShoppingItems(prev => {
+      const existingNames = new Set(prev.map(item => item.name.toLowerCase()));
+      const newItems: ShoppingItem[] = names
+        .filter(name => !existingNames.has(name.toLowerCase()))
+        .map(name => ({
+          id: uuidv4(),
+          name,
+          category: "Unknown",
+          aisle: "Unknown"
+        }));
+      return [...prev, ...newItems];
+    });
+  };
+
+
+  const handleAddToCart = (product: Product) => {
+    toast({
+      title: "Added to Cart",
+      description: `${product.name} added to your cart`,
+    });
+  };
+
+  const handleImageCapture = (file: File) => {
+    toast({
+      title: "Image Captured",
+      description: `${file.name} ready for processing`,
+    });
   };
 
   return (

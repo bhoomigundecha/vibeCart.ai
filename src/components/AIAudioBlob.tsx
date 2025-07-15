@@ -70,12 +70,15 @@ export function AIAudioBlob({
             if (Array.isArray(items)) {
               console.log(items)
               console.log("Adding to shopping list:", items);
+              console.log(items);
               addShoppingItems?.(items);
             }
           } catch (err) {
             console.error("Error parsing tool content:", err);
           }
         }
+
+        
 
 
         const last = data.response.find((m: any) => m.role === "assistant" && m.content);

@@ -22,3 +22,25 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# dependencies
+node_modules/
+
+# build output
+dist/
+build/
+out/
+
+# environment variables
+.env*
+!.env.example
+
+# OS-specific
+.DS_Store
+
+# log files
+*.log
+
+# Bun lock file (optional)
+bun.lockb
+

@@ -1,6 +1,7 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, Trash2 } from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
 
 export interface ShoppingItem {
   id: string;
@@ -12,18 +13,19 @@ export interface ShoppingItem {
 interface ShoppingListPopupProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  shoppingItems: ShoppingItem[];
-  setShoppingItems: React.Dispatch<React.SetStateAction<ShoppingItem[]>>;
+  items: ShoppingItem[];
+  onItemsChange: (items: ShoppingItem[]) => void;
 }
 
 export function ShoppingListPopup({
   open,
   onOpenChange,
-  shoppingItems,
-  setShoppingItems
+  items,
+  onItemsChange
 }: ShoppingListPopupProps) {
   const deleteItem = (id: string) => {
-    setShoppingItems((items) => items.filter((item) => item.id !== id));
+    const updatedItems = items.filter((item) => item.id !== id);
+    onItemsChange(updatedItems);
   };
 
   return (
@@ -44,13 +46,13 @@ export function ShoppingListPopup({
           </div>
         </SheetHeader>
 
-        <div className="space-y-3 mt-6">
-          {shoppingItems.length === 0 ? (
+        <div className="space-y-3 mt-6 overflow-y-auto max-h-[calc(80vh-100px)]">
+          {items.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">Your shopping list is empty</p>
             </div>
           ) : (
-            shoppingItems.map((item, index) => (
+            items.map((item, index) => (
               <div
                 key={item.id}
                 className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border"
@@ -67,6 +69,7 @@ export function ShoppingListPopup({
                     </div>
                   </div>
                 </div>
+
                 <Button
                   variant="ghost"
                   size="icon"

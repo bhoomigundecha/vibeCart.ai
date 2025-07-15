@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Mic, MicOff, AudioLines } from "lucide-react";
-
 export type AudioBlobState = "speaking" | "listening" | "inactive";
 
 interface AIAudioBlobProps {
@@ -10,7 +9,8 @@ interface AIAudioBlobProps {
   addShoppingItems?: (items: string[]) => void;
 }
 
-const chatHistory: { role: "user" | "assistant"; content: string }[] = [];
+const chatHistory: { role: "system" | "assistant" | "user" | "tools"; content: string }[] = [];
+
 
 export function AIAudioBlob({
   state = "inactive",
@@ -59,21 +59,24 @@ export function AIAudioBlob({
         const data = await response.json();
         console.log("Full API Response:", data);
 
-        data.response.forEach((message: any) => {
-          if (message.role === "tool") {
-            try {
-              const toolData = JSON.parse(message.content);
-              const items = toolData?.data?.shopping_list;
+        const toolMessage = [...data.response].reverse().find((message: any) => message.role === "tool");
 
-              if (Array.isArray(items)) {
-                console.log("Adding to shopping list:", items);
-                addShoppingItems?.(items);
-              }
-            } catch (err) {
-              console.error("Error parsing tool content:", err);
+        if (toolMessage) {
+          try {
+            const toolData = JSON.parse(toolMessage.content);
+            const inner = typeof toolData.data === "string" ? JSON.parse(toolData.data) : toolData.data;
+            const items = inner?.shopping_list;
+
+            if (Array.isArray(items)) {
+              console.log(items)
+              console.log("Adding to shopping list:", items);
+              addShoppingItems?.(items);
             }
+          } catch (err) {
+            console.error("Error parsing tool content:", err);
           }
-        });
+        }
+
 
         const last = data.response.find((m: any) => m.role === "assistant" && m.content);
         const aiResponse = last?.content || "";

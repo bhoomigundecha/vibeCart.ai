@@ -7,6 +7,7 @@ export interface Product {
   name: string;
   price: number;
   originalPrice?: number;
+  discount?: number;
   image: string;
   description?: string;
 }
@@ -47,12 +48,12 @@ export function ProductCards({ products, onAddToCart }: ProductCardsProps) {
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
-              
+
               <div className="p-3 space-y-1">
-                <h3 className="text-sm font-medium text-foreground truncate">
+                <h3 className="text-sm font-medium text-foreground line-clamp-2">
                   {product.name}
                 </h3>
-                
+
                 <div className="flex items-center space-x-2">
                   <span className="text-sm font-semibold text-foreground">
                     ₹{product.price}
@@ -63,7 +64,13 @@ export function ProductCards({ products, onAddToCart }: ProductCardsProps) {
                     </span>
                   )}
                 </div>
-                
+
+                {product.discount && (
+                  <div className="text-xs text-green-600 font-medium">
+                    {product.discount}% off
+                  </div>
+                )}
+
                 {product.description && (
                   <p className="text-xs text-muted-foreground line-clamp-2">
                     {product.description}

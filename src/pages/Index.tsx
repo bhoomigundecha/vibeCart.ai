@@ -25,10 +25,10 @@ const Index = () => {
   const [showMap, setShowMap] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([
-    { id: uuidv4(), name: "Organic Bananas", category: "Fresh Produce", aisle: "Aisle 5" },
-    { id: uuidv4(), name: "Whole Milk", category: "Fresh Produce", aisle: "Aisle 5" },
-    { id: uuidv4(), name: "Tomato", category: "Fresh Produce", aisle: "Aisle 5" },
-    { id: uuidv4(), name: "Pizza", category: "Frozen", aisle: "Aisle 10" },
+    // { id: uuidv4(), name: "Organic Bananas", category: "Fresh Produce", aisle: "Aisle 5" },
+    // { id: uuidv4(), name: "Whole Milk", category: "Fresh Produce", aisle: "Aisle 5" },
+    // { id: uuidv4(), name: "Tomato", category: "Fresh Produce", aisle: "Aisle 5" },
+    // { id: uuidv4(), name: "Pizza", category: "Frozen", aisle: "Aisle 10" },
   ]);
 
   const handleItemsChange = (items: ShoppingItem[]) => {
@@ -60,10 +60,10 @@ const Index = () => {
 
         setProducts(formattedProducts);
       } else {
-        console.warn("Unexpected recommendation response format:", data);
+        console.warn("Rcommendation has the wrong from:", data);
       }
     } catch (err) {
-      console.error("Failed to fetch product recommendations:", err);
+      console.error("cant fetch:", err);
     }
   }, []);
 

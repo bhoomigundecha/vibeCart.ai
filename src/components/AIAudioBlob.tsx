@@ -42,7 +42,7 @@ export function AIAudioBlob({
 
     recognition.onresult = async (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
-      console.log("🎤 Heard:", transcript);
+      console.log("Heard:", transcript);
 
       chatHistory.push({ role: "user", content: transcript });
 
@@ -82,6 +82,25 @@ export function AIAudioBlob({
         const aiResponse = last?.content || "";
         console.log("AI:", aiResponse);
         chatHistory.push({ role: "assistant", content: aiResponse });
+
+        if (aiResponse) {
+            const ttsResponse = await fetch("https://top-live-tadpole.ngrok-free.app/tts", {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+              },
+              body: JSON.stringify({ text: aiResponse }),
+            });
+
+            if (!ttsResponse.ok) throw new Error("TTS request failed");
+
+            const audioBlob = await ttsResponse.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+
+            const audio = new Audio(audioUrl);
+            audio.play();
+          }
+
       } catch (err) {
         console.error("API Error:", err);
       }
